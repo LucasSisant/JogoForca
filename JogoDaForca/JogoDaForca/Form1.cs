@@ -1,23 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace JogoDaForca
 {
     public partial class frmJogoDaForca : Form
     {
-        private string[] palavras;
-        private string[] dicas;
-        private int erros;
-        private string palavraSec;
-        private string palavraTela;
+        #region "Variaveis"
+        private string[] _palavras;
+        private string[] _dicas;
+        private int _erros;
+        private string _palavraSec;
+        private string _palavraTela;
+        #endregion
 
+        #region "Métodos"
         public frmJogoDaForca()
         {
             InitializeComponent();
@@ -26,49 +22,62 @@ namespace JogoDaForca
 
         private void iniciaVetores()
         {
-            palavras = new string[5];
-            dicas = new string[5];
+            _palavras = new string[5];
+            _dicas = new string[5];
 
-            palavras[0] = "PIPOCA";
-            dicas[0] = "CINEMA";
+            _palavras[0] = "PIPOCA";
+            _dicas[0] = "CINEMA";
 
-            palavras[1] = "ENERGIA";
-            dicas[1] = "LUZ";
+            _palavras[1] = "ENERGIA";
+            _dicas[1] = "LUZ";
 
-            palavras[2] = "ONIBUS";
-            dicas[2] = "TRASNPORTE";
+            _palavras[2] = "ONIBUS";
+            _dicas[2] = "TRASNPORTE";
 
-            palavras[3] = "REFRIGERANTE";
-            dicas[3] = "BEBIDA";
+            _palavras[3] = "REFRIGERANTE";
+            _dicas[3] = "BEBIDA";
 
-            palavras[4] = "FUTEBOL";
-            dicas[4] = "ESPORTE";
+            _palavras[4] = "FUTEBOL";
+            _dicas[4] = "ESPORTE";
         }
+
         private void iniciaJogo()
         {
             Random r = new Random();
-            int posicao = r.Next(palavras.Length);
-            palavraTela = "";
-            erros = 0;
-            palavraSec = palavras[posicao];
-            lblDica.Text = dicas[posicao];
+            int posicao = r.Next(_palavras.Length);
+            _palavraTela = "";
+            _erros = 0;
+            _palavraSec = _palavras[posicao];
+            lblDica.Text = _dicas[posicao];
 
-            for (int i = 0; i < palavraSec.Length; i++)
+            for (int i = 0; i < _palavraSec.Length; i++)
             {
-                palavraTela = palavraTela + "#";
+                _palavraTela = _palavraTela + "#";
             }
             boxImagem.Image = Properties.Resources._0;
-            lblPalavraSecreta.Text = palavraTela;
+            lblPalavraSecreta.Text = _palavraTela;
         }
-        private void btnStart_Click(object sender, EventArgs e)
+
+        private bool verificaLetra(string letra)
         {
-            pnlGanhou.Visible = false;
-            pnlInicio.Visible = false;
-            pnlGameOver.Visible = false;
-            restauraTeclas();
-            pnlJogo.Visible = true;
-            btnStart.Text = "Restart";
-            iniciaJogo();
+            Boolean achou = false;
+            char l = Convert.ToChar(letra);
+            string text = "";
+            for (int i = 0; i < _palavraSec.Length; i++)
+            {
+                if (_palavraSec[i] == l)
+                {
+                    achou = true;
+                    text = text + l;
+                }
+                else
+                {
+                    text = text + _palavraTela[i];
+                }
+
+            }
+            _palavraTela = text;
+            return achou;
         }
 
         private void restauraTeclas()
@@ -100,81 +109,68 @@ namespace JogoDaForca
             btnY.Visible = true;
             btnZ.Visible = true;
         }
+        #endregion
 
-        private bool verificaLetra(string letra)
+        #region "Eventos"
+        private void btnStart_Click(object sender, EventArgs e)
         {
-            Boolean achou = false;
-            char l = Convert.ToChar(letra);
-            string text = "";
-            for (int i = 0; i < palavraSec.Length; i++)
-            {
-                if (palavraSec[i] == l)
-                {
-                    achou = true;
-                    text = text + l;
-                }
-                else
-                {
-                    text = text + palavraTela[i];
-                }
-
-            }
-            palavraTela = text;
-            return achou;
+            pnlGanhou.Visible = false;
+            pnlInicio.Visible = false;
+            pnlGameOver.Visible = false;
+            restauraTeclas();
+            pnlJogo.Visible = true;
+            btnStart.Text = "Restart";
+            iniciaJogo();
         }
 
         private void letra_select(object sender, EventArgs e)
         {
-            if (erros < 6)
+            Button btnLetraEscolhida = sender as Button;
+            btnLetraEscolhida.Visible = false;
+            if (verificaLetra(btnLetraEscolhida.Text))
             {
-                Button btnLetraEscolhida = sender as Button;
-                btnLetraEscolhida.Visible = false;
-                if (verificaLetra(btnLetraEscolhida.Text))
+                lblPalavraSecreta.Text = _palavraTela;
+                int mask = _palavraTela.IndexOf("#");
+                if (mask == -1)
                 {
-                    lblPalavraSecreta.Text = palavraTela;
-                    int mask = palavraTela.IndexOf("#");
-                    if (mask == -1)
-                    {
-                        lblRevela.Text = palavraTela;
-                        pnlGanhou.Visible = true;
-                        pnlGameOver.Visible = false;
-                        pnlInicio.Visible = false;
-                        pnlJogo.Visible = false;
-
-                    }
-
-                }
-                else
-                {
-                    //ALERTA DE ERRO
-                    erros = erros + 1;
-                    switch (erros)
-                    {
-                        case 1:
-                            boxImagem.Image = Properties.Resources._1;
-                            break;
-                        case 2:
-                            boxImagem.Image = Properties.Resources._2;
-                            break;
-                        case 3:
-                            boxImagem.Image = Properties.Resources._3;
-                            break;
-                        case 4:
-                            boxImagem.Image = Properties.Resources._4;
-                            break;
-                        case 5:
-                            boxImagem.Image = Properties.Resources._5;
-                            break;
-                        case 6:
-                            boxImagem.Image = Properties.Resources._6;
-                            pnlJogo.Visible = false;
-                            pnlGameOver.Visible = true;
-                            break;
-                    }
+                    lblRevela.Text = _palavraTela;
+                    pnlGanhou.Visible = true;
+                    pnlGameOver.Visible = false;
+                    pnlInicio.Visible = false;
+                    pnlJogo.Visible = false;
                 }
             }
-
-
+            else
+            {
+                _erros = _erros + 1;
+                switch (_erros)
+                {
+                    case 1:
+                        boxImagem.Image = Properties.Resources._1;
+                        break;
+                    case 2:
+                        boxImagem.Image = Properties.Resources._2;
+                        break;
+                    case 3:
+                        boxImagem.Image = Properties.Resources._3;
+                        break;
+                    case 4:
+                        boxImagem.Image = Properties.Resources._4;
+                        break;
+                    case 5:
+                        boxImagem.Image = Properties.Resources._5;
+                        break;
+                    case 6:
+                        boxImagem.Image = Properties.Resources._6;
+                        pnlJogo.Visible = false;
+                        pnlGameOver.Visible = true;
+                        break;
+                }
+            }
         }
+
+        #endregion
+
+
     }
 }
